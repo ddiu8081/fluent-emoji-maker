@@ -8,13 +8,13 @@ const App: Component = () => {
   const [detailImages, setDetailImages] = createSignal([]);
 
   const [selectedHead, setSelectedHead] = createSignal(0);
-  const [selectedHeadImage, setSelectedHeadImage] = createSignal('');
   const [selectedEyes, setSelectedEyes] = createSignal(0);
-  const [selectedEyesImage, setSelectedEyesImage] = createSignal('');
   const [selectedMouth, setSelectedMouth] = createSignal(0);
-  const [selectedMouthImage, setSelectedMouthImage] = createSignal('');
   const [selectedDetail, setSelectedDetail] = createSignal(0);
-  const [selectedDetailImage, setSelectedDetailImage] = createSignal('');
+  const selectedHeadImage = () => headImages()[selectedHead()]?.default
+  const selectedEyesImage = () => eyesImages()[selectedEyes()]?.default
+  const selectedMouthImage = () => mouthImages()[selectedMouth()]?.default
+  const selectedDetailImage = () => detailImages()[selectedDetail()]?.default
 
   const loadImage = async () => {
     // head
@@ -45,57 +45,71 @@ const App: Component = () => {
 
   const handleClickHead = (i) => {
     setSelectedHead(i)
-    console.log(headImages()[i()].default)
-    setSelectedHeadImage(headImages()[i()].default)
   }
   const handleClickEyes = (i) => {
     setSelectedEyes(i)
-    setSelectedEyesImage(eyesImages()[i()].default)
   }
   const handleClickMouth = (i) => {
     setSelectedMouth(i)
-    setSelectedMouthImage(mouthImages()[i()].default)
   }
   const handleClickDetail = (i) => {
     setSelectedDetail(i)
-    setSelectedDetailImage(detailImages()[i()].default)
+  }
+
+  const randomInt = (min, max) => {
+    return Math.floor(Math.random() * (max - min + 1)) + min
+  }
+
+  const getRandom = () => {
+    const head = randomInt(0, headImages().length - 1)
+    const eyes = randomInt(0, eyesImages().length - 1)
+    const mouth = randomInt(0, mouthImages().length - 1)
+    const detail = randomInt(0, detailImages().length - 1)
+    setSelectedHead(head)
+    setSelectedEyes(eyes)
+    setSelectedMouth(mouth)
+    setSelectedDetail(detail)
   }
 
   return (
     <>
       <h1 text="2xl" font="bold">Fluent Emoji Maker</h1>
 
-      <div mt-4 flex="~ row wrap" gap-2>
+      <h2 mt-4 text-sm font-bold>Head</h2>
+      <div flex="~ row wrap" gap-2>
         <For each={headImages()}>
           {(item, index) => (
-            <SelectButton >
+            <SelectButton highlight={() => index() === selectedHead()}>
               <img onClick={[handleClickHead, index]} src={item.default} alt=""></img>
             </SelectButton>
           )}
         </For>
       </div>
-      <div mt-8 flex="~ row wrap" gap-2>
+      <h2 mt-4 text-sm font-bold>Eyes</h2>
+      <div flex="~ row wrap" gap-2>
         <For each={eyesImages()}>
           {(item, index) => (
-            <SelectButton >
+            <SelectButton index={index()} highlight={() => index() === selectedEyes()}>
               <img onClick={[handleClickEyes, index]} src={item.default} alt=""></img>
             </SelectButton>
           )}
         </For>
       </div>
-      <div mt-8 flex="~ row wrap" gap-2>
+      <h2 mt-4 text-sm font-bold>Mouth</h2>
+      <div flex="~ row wrap" gap-2>
         <For each={mouthImages()}>
           {(item, index) => (
-            <SelectButton >
+            <SelectButton index={index()} highlight={() => index() === selectedMouth()}>
               <img onClick={[handleClickMouth, index]} src={item.default} alt=""></img>
             </SelectButton>
           )}
         </For>
       </div>
-      <div mt-8 flex="~ row wrap" gap-2>
+      <h2 mt-4 text-sm font-bold>Detail</h2>
+      <div flex="~ row wrap" gap-2>
         <For each={detailImages()}>
           {(item, index) => (
-            <SelectButton >
+            <SelectButton index={index()} highlight={() => index() === selectedDetail()}>
               <img onClick={[handleClickDetail, index]} src={item.default} alt=""></img>
             </SelectButton>
           )}
@@ -107,6 +121,10 @@ const App: Component = () => {
         <img class="absolute" w-24 h-24 src={ selectedEyesImage() } />
         <img class="absolute" w-24 h-24 src={ selectedMouthImage() } />
         <img class="absolute" w-24 h-24 src={ selectedDetailImage() } />
+      </div>
+
+      <div mt-4>
+        <button onClick={getRandom}>Random</button>
       </div>
     </>
   );
