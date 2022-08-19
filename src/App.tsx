@@ -1,12 +1,16 @@
 import { Component, createSignal, For } from 'solid-js'
-import Comp from './Comp'
-import image from './assets/head/1.svg'
-
+import SelectButton from './components/SelectButton'
 
 const App: Component = () => {
   const [headImages, setHeadImages] = createSignal([]);
   const [eyesImages, setEyesImages] = createSignal([]);
   const [mouthImages, setMouthImages] = createSignal([]);
+  const [selectedHead, setSelectedHead] = createSignal(0);
+  const [selectedHeadImage, setSelectedHeadImage] = createSignal('');
+  const [selectedEyes, setSelectedEyes] = createSignal(0);
+  const [selectedEyesImage, setSelectedEyesImage] = createSignal('');
+  const [selectedMouth, setSelectedMouth] = createSignal(0);
+  const [selectedMouthImage, setSelectedMouthImage] = createSignal('');  
 
   const loadImage = async () => {
     // head
@@ -29,48 +33,56 @@ const App: Component = () => {
   }
   loadImage()
 
-  const eyesModules = import.meta.glob('./assets/eyes/*.svg')
-  const eyesKeys = Object.keys(eyesModules)
-
-  const mouthModules = import.meta.glob('./assets/mouth/*.svg')
-  const mouthKeys = Object.keys(mouthModules)
-
-  const handleClick = (i) => {
-    alert('click' + i());
+  const handleClickHead = (i) => {
+    setSelectedHead(i)
+    console.log(headImages()[i()].default)
+    setSelectedHeadImage(headImages()[i()].default)
+  }
+  const handleClickEyes = (i) => {
+    setSelectedEyes(i)
+    setSelectedEyesImage(eyesImages()[i()].default)
+  }
+  const handleClickMouth = (i) => {
+    setSelectedMouth(i)
+    setSelectedMouthImage(mouthImages()[i()].default)
   }
 
   return (
     <>
       <h1 text="2xl" font="bold">Fluent Emoji Maker</h1>
 
-      <div>
+      <div mt-4 flex="~ row" gap-2>
         <For each={headImages()}>
-          {item => (
-            <img src={item.default} alt=""></img>
+          {(item, index) => (
+            <SelectButton >
+              <img onClick={[handleClickHead, index]} src={item.default} alt=""></img>
+            </SelectButton>
           )}
         </For>
       </div>
-      <div mt-4>
+      <div mt-4 flex="~ row" gap-2>
         <For each={eyesImages()}>
-          {item => (
-            <img src={item.default} alt=""></img>
+          {(item, index) => (
+            <SelectButton >
+              <img onClick={[handleClickEyes, index]} src={item.default} alt=""></img>
+            </SelectButton>
           )}
         </For>
       </div>
-      <div mt-4>
+      <div mt-4 flex="~ row" gap-2>
         <For each={mouthImages()}>
-          {item => (
-            <img src={item.default} alt=""></img>
+          {(item, index) => (
+            <SelectButton >
+              <img onClick={[handleClickMouth, index]} src={item.default} alt=""></img>
+            </SelectButton>
           )}
         </For>
-      </div>
-
-      <div mt-4>
-        <img w-24 src={image} alt="" />
       </div>
 
       <div mt-8 border h-32>
-        {/* {images} */}
+        <img absolute w-24 h-24 src={ selectedHeadImage() } />
+        <img absolute w-24 h-24 src={ selectedEyesImage() } />
+        <img absolute w-24 h-24 src={ selectedMouthImage() } />
       </div>
     </>
   );
