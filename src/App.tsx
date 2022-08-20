@@ -1,14 +1,24 @@
-import { Component, createSignal, For, onMount, createEffect } from 'solid-js'
+import { Component, createSignal, For, createEffect, onMount } from 'solid-js'
 import SelectButton from './components/SelectButton'
 
-const pathToImage = (path) => {
-  return new Promise(resolve => {
+type SvgImageModule = typeof import('*.svg')
+type ImportModuleFunction = () => Promise<SvgImageModule>
+
+const pathToImage = (path: string) => {
+  return new Promise<HTMLImageElement>(resolve => {
     const img = new Image()
     img.src = path
     img.onload = () => {
       resolve(img)
     }
   })
+}
+
+const resolveImportGlobModule = async (modules: Record<string, ImportModuleFunction>) => {
+  const imports = Object.values(modules).map(importFn => importFn())
+  const loadedModules = await Promise.all(imports)
+
+  return loadedModules.map(module => module.default)
 }
 
 const App: Component = () => {
@@ -21,39 +31,37 @@ const App: Component = () => {
   const [selectedEyes, setSelectedEyes] = createSignal(0);
   const [selectedMouth, setSelectedMouth] = createSignal(0);
   const [selectedDetail, setSelectedDetail] = createSignal(0);
-  const selectedHeadImage = () => headImages()[selectedHead()]?.default
-  const selectedEyesImage = () => eyesImages()[selectedEyes()]?.default
-  const selectedMouthImage = () => mouthImages()[selectedMouth()]?.default
-  const selectedDetailImage = () => detailImages()[selectedDetail()]?.default
+  const selectedHeadImage = () => headImages()[selectedHead()]
+  const selectedEyesImage = () => eyesImages()[selectedEyes()]
+  const selectedMouthImage = () => mouthImages()[selectedMouth()]
+  const selectedDetailImage = () => detailImages()[selectedDetail()]
 
   const loadImage = async () => {
     // head
-    const headModules = import.meta.glob('./assets/head/*.svg')
-    const headValues = Object.values(headModules).map(m => m())
-    const fullHeadImages = await Promise.all(headValues)
+    const headModules = import.meta.glob<SvgImageModule>('./assets/head/*.svg')
+    const fullHeadImages = await resolveImportGlobModule(headModules)
     setHeadImages(fullHeadImages)
 
     // eyes
-    const eyesModules = await import.meta.glob('./assets/eyes/*.svg')
-    const eyesValues = Object.values(eyesModules).map(m => m())
-    const fullEyesImages = await Promise.all(eyesValues)
+    const eyesModules = import.meta.glob<SvgImageModule>('./assets/eyes/*.svg')
+    const fullEyesImages = await resolveImportGlobModule(eyesModules)
     setEyesImages(fullEyesImages)
 
     // mouth
-    const mouthModules = await import.meta.glob('./assets/mouth/*.svg')
-    const mouthValues = Object.values(mouthModules).map(m => m())
-    const fullMouthImages = await Promise.all(mouthValues)
+    const mouthModules = import.meta.glob<SvgImageModule>('./assets/mouth/*.svg')
+    const fullMouthImages = await resolveImportGlobModule(mouthModules)
     setMouthImages(fullMouthImages)
 
     // detail
-    const detailModules = await import.meta.glob('./assets/details/*.svg')
-    const detailValues = Object.values(detailModules).map(m => m())
-    const fullDetailImages = await Promise.all(detailValues)
+    const detailModules = import.meta.glob<SvgImageModule>('./assets/details/*.svg')
+    const fullDetailImages = await resolveImportGlobModule(detailModules)
     setDetailImages(fullDetailImages)
   }
-  loadImage()
+  
+  // lifecycle
+  onMount(() => loadImage())
 
-  let canvas, canvasSize = 32;
+  let canvas: HTMLCanvasElement, canvasSize = 32;
 
   createEffect(() => {
     const headPath = selectedHeadImage()
@@ -70,20 +78,20 @@ const App: Component = () => {
       })
     })
   })
-  const handleClickHead = (i) => {
+  const handleClickHead = (i: number) => {
     setSelectedHead(i)
   }
-  const handleClickEyes = (i) => {
+  const handleClickEyes = (i: number) => {
     setSelectedEyes(i)
   }
-  const handleClickMouth = (i) => {
+  const handleClickMouth = (i: number) => {
     setSelectedMouth(i)
   }
-  const handleClickDetail = (i) => {
+  const handleClickDetail = (i: number) => {
     setSelectedDetail(i)
   }
 
-  const randomInt = (min, max) => {
+  const randomInt = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min
   }
 
@@ -99,7 +107,7 @@ const App: Component = () => {
   }
 
   const exportImage = () => {
-    canvas.toBlob((blob) => {
+    canvas.toBlob((blob: Blob) => {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
@@ -117,7 +125,7 @@ const App: Component = () => {
         <For each={headImages()}>
           {(item, index) => (
             <SelectButton highlight={() => index() === selectedHead()}>
-              <img onClick={[handleClickHead, index]} src={item.default} alt=""></img>
+              <img onClick={[handleClickHead, index]} src={item} alt=""></img>
             </SelectButton>
           )}
         </For>
@@ -127,7 +135,7 @@ const App: Component = () => {
         <For each={eyesImages()}>
           {(item, index) => (
             <SelectButton index={index()} highlight={() => index() === selectedEyes()}>
-              <img onClick={[handleClickEyes, index]} src={item.default} alt=""></img>
+              <img onClick={[handleClickEyes, index]} src={item} alt=""></img>
             </SelectButton>
           )}
         </For>
@@ -137,7 +145,7 @@ const App: Component = () => {
         <For each={mouthImages()}>
           {(item, index) => (
             <SelectButton index={index()} highlight={() => index() === selectedMouth()}>
-              <img onClick={[handleClickMouth, index]} src={item.default} alt=""></img>
+              <img onClick={[handleClickMouth, index]} src={item} alt=""></img>
             </SelectButton>
           )}
         </For>
@@ -147,7 +155,7 @@ const App: Component = () => {
         <For each={detailImages()}>
           {(item, index) => (
             <SelectButton index={index()} highlight={() => index() === selectedDetail()}>
-              <img onClick={[handleClickDetail, index]} src={item.default} alt=""></img>
+              <img onClick={[handleClickDetail, index]} src={item} alt=""></img>
             </SelectButton>
           )}
         </For>
