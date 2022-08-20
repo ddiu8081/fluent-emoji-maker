@@ -3,7 +3,8 @@ export default (props) => {
   const isHighlight = props.highlight;
   return (
     <div
-      bg-gray-100 p-2
+      flex items-center justify-center
+      bg-gray-100 h-14 w-14
       rounded-md
       border border-2 cursor-pointer
       transition-colors

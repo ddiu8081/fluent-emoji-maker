@@ -1,5 +1,5 @@
 import { Component, createSignal, createEffect, onMount } from 'solid-js'
-import { For } from 'solid-js'
+import { For, Switch, Match, Show } from 'solid-js'
 import SelectButton from './components/SelectButton'
 import Header from './components/Header'
 import Footer from './components/Footer'
@@ -8,7 +8,10 @@ type SvgImageModule = typeof import('*.svg')
 type ImportModuleFunction = () => Promise<SvgImageModule>
 
 const pathToImage = (path: string) => {
-  return new Promise<HTMLImageElement>(resolve => {
+  return new Promise<HTMLImageElement | null>(resolve => {
+    if (path === '') {
+      resolve(null)
+    }
     const img = new Image()
     img.src = path
     img.onload = () => {
@@ -65,9 +68,9 @@ const App: Component = () => {
     const fullDetailImages = await resolveImportGlobModule(detailModules)
     setImages({
       head: fullHeadImages,
-      eyes: fullEyesImages,
-      mouth: fullMouthImages,
-      detail: fullDetailImages,
+      eyes: ['', ...fullEyesImages],
+      mouth: ['', ...fullMouthImages],
+      detail: ['', ...fullDetailImages],
     })
     getRandom()
   }
@@ -90,13 +93,13 @@ const App: Component = () => {
       ctx.fillStyle = '#fff';
       ctx.fillRect(0, 0, imageSize, imageSize)
       images.forEach(img => {
-        ctx.drawImage(img, 0, 0, imageSize, imageSize)
+        img && ctx.drawImage(img, 0, 0, imageSize, imageSize)
       })
     })
   })
 
-  const handleSelectItem = ({tab, index}) => {
-    setSelectedIndex({ ...selectedIndex(), [tab]: index() })
+  const handleSelectItem = ({tab, index}: {tab: string, index: number}) => {
+    setSelectedIndex({ ...selectedIndex(), [tab]: index })
   }
 
   const randomInt = (min: number, max: number) => {
@@ -146,7 +149,6 @@ const App: Component = () => {
           <div
             inline-flex px-3 items-center gap-1
             rounded-full
-            cursor-pointer
             bg-gray-100 hover:bg-red-200 cursor-pointer
             onClick={() => exportImage()}
           >
@@ -157,30 +159,45 @@ const App: Component = () => {
         <div w-full mt-4>
           <header flex items-center gap-3 p-4 border-b border-gray-100 justify-center>
             <For each={tabs}>
-              {item => (
+              {(item, index) => (
                 <div 
-                  p-2 rounded-lg cursor-pointer
+                  flex items-center justify-center
+                  h-16 w-16 rounded-lg cursor-pointer
                   hover:bg-red-200
                   class={selectedTab() === item ? 'bg-red-200' : 'bg-gray-100'}
                   onClick={() => setSelectedTab(item)}
                 >
-                  <img src={selectedImage()[item]} h-12></img>
+                  <Show
+                    when={selectedImage()[item]}
+                  >
+                    <img src={selectedImage()[item]} alt={selectedTab() + index()} h-12 w-12></img>
+                  </Show>
                 </div>
               )}
             </For>
           </header>
           <main p-4>
             <div flex="~ row wrap" gap-2 justify-center>
-              <For each={images()[selectedTab()]}>
-                {(item, index) => (
-                  <SelectButton 
-                    highlight={() => index() === selectedIndex()[selectedTab()]}
-                    onClick={[handleSelectItem, {tab: selectedTab(), index }]}
-                  >
-                    <img src={item} alt=""></img>
-                  </SelectButton>
-                )}
-              </For>
+              <Switch>
+                <For each={Object.keys(images())}>
+                  {(tab: EmojiSlice) => (
+                    <Match when={tab === selectedTab()}>
+                      <For each={images()[tab]}>
+                        {(item, index) => (
+                          <SelectButton
+                            highlight={() => index() === selectedIndex()[selectedTab()]}
+                            onClick={[handleSelectItem, {tab: selectedTab(), index: index() }]}
+                          >
+                            <Show when={item}>
+                              <img src={item} alt={selectedTab() + index()} h-8 w-8></img>
+                            </Show>
+                          </SelectButton>
+                        )}
+                      </For>
+                    </Match>
+                  )}
+                </For>
+              </Switch>
             </div>
           </main>
         </div>
