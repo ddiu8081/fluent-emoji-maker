@@ -2,6 +2,7 @@ import { Component, createSignal, For, createEffect, onMount } from 'solid-js'
 import SelectButton from './components/SelectButton'
 
 type SvgImageModule = typeof import('*.svg')
+type ImportModuleFunction = () => Promise<SvgImageModule>
 
 const pathToImage = (path: string) => {
   return new Promise<HTMLImageElement>(resolve => {
@@ -13,8 +14,9 @@ const pathToImage = (path: string) => {
   })
 }
 
-const resolveImportGlobModule = async (modules: (() => Promise<SvgImageModule>)[]) => {
-  const loadedModules = await Promise.all(modules.map(module => module()))
+const resolveImportGlobModule = async (modules: Record<string, ImportModuleFunction>) => {
+  const imports = Object.values(modules).map(importFn => importFn())
+  const loadedModules = await Promise.all(imports)
 
   return loadedModules.map(module => module.default)
 }
@@ -37,22 +39,22 @@ const App: Component = () => {
   const loadImage = async () => {
     // head
     const headModules = import.meta.glob<SvgImageModule>('./assets/head/*.svg')
-    const fullHeadImages = await resolveImportGlobModule(Object.values(headModules))
+    const fullHeadImages = await resolveImportGlobModule(headModules)
     setHeadImages(fullHeadImages)
 
     // eyes
     const eyesModules = import.meta.glob<SvgImageModule>('./assets/eyes/*.svg')
-    const fullEyesImages = await resolveImportGlobModule(Object.values(eyesModules))
+    const fullEyesImages = await resolveImportGlobModule(eyesModules)
     setEyesImages(fullEyesImages)
 
     // mouth
     const mouthModules = import.meta.glob<SvgImageModule>('./assets/mouth/*.svg')
-    const fullMouthImages = await resolveImportGlobModule(Object.values(mouthModules))
+    const fullMouthImages = await resolveImportGlobModule(mouthModules)
     setMouthImages(fullMouthImages)
 
     // detail
     const detailModules = import.meta.glob<SvgImageModule>('./assets/details/*.svg')
-    const fullDetailImages = await resolveImportGlobModule(Object.values(detailModules))
+    const fullDetailImages = await resolveImportGlobModule(detailModules)
     setDetailImages(fullDetailImages)
   }
   
