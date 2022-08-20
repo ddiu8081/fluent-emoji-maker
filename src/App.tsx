@@ -1,5 +1,15 @@
-import { Component, createSignal, For } from 'solid-js'
+import { Component, createSignal, For, onMount, createEffect } from 'solid-js'
 import SelectButton from './components/SelectButton'
+
+const pathToImage = (path) => {
+  return new Promise(resolve => {
+    const img = new Image()
+    img.src = path
+    img.onload = () => {
+      resolve(img)
+    }
+  })
+}
 
 const App: Component = () => {
   const [headImages, setHeadImages] = createSignal([]);
@@ -18,7 +28,7 @@ const App: Component = () => {
 
   const loadImage = async () => {
     // head
-    const headModules = await import.meta.glob('./assets/head/*.svg')
+    const headModules = import.meta.glob('./assets/head/*.svg')
     const headValues = Object.values(headModules).map(m => m())
     const fullHeadImages = await Promise.all(headValues)
     setHeadImages(fullHeadImages)
@@ -43,6 +53,23 @@ const App: Component = () => {
   }
   loadImage()
 
+  let canvas, canvasSize = 32;
+
+  createEffect(() => {
+    const headPath = selectedHeadImage()
+    const eyesPath = selectedEyesImage()
+    const mouthPath = selectedMouthImage()
+    const detailPath = selectedDetailImage()
+    Promise.all([pathToImage(headPath), pathToImage(eyesPath), pathToImage(mouthPath), pathToImage(detailPath)]).then(images => {
+      const ctx = canvas.getContext('2d')
+      ctx.clearRect(0, 0, canvasSize, canvasSize)
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvasSize, canvasSize)
+      images.forEach(img => {
+        ctx.drawImage(img, 0, 0)
+      })
+    })
+  })
   const handleClickHead = (i) => {
     setSelectedHead(i)
   }
@@ -69,6 +96,16 @@ const App: Component = () => {
     setSelectedEyes(eyes)
     setSelectedMouth(mouth)
     setSelectedDetail(detail)
+  }
+
+  const exportImage = () => {
+    canvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${Date.now()}.png`
+      a.click()
+    })
   }
 
   return (
@@ -117,14 +154,12 @@ const App: Component = () => {
       </div>
 
       <div mt-8 border h-32>
-        <img class="absolute" w-24 h-24 src={ selectedHeadImage() } />
-        <img class="absolute" w-24 h-24 src={ selectedEyesImage() } />
-        <img class="absolute" w-24 h-24 src={ selectedMouthImage() } />
-        <img class="absolute" w-24 h-24 src={ selectedDetailImage() } />
+        <canvas ref={canvas} width={canvasSize} height={canvasSize}></canvas>
       </div>
 
       <div mt-4>
         <button onClick={getRandom}>Random</button>
+        <button onClick={() => exportImage()}>Export</button>
       </div>
     </>
   );
