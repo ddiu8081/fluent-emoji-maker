@@ -55,7 +55,9 @@ const App: Component = () => {
     const fullDetailImages = await resolveImportGlobModule(Object.values(detailModules))
     setDetailImages(fullDetailImages)
   }
-  loadImage()
+  
+  // lifecycle
+  onMount(() => loadImage())
 
   let canvas: HTMLCanvasElement, canvasSize = 32;
 
