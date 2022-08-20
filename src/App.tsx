@@ -1,8 +1,8 @@
-import { Component, createSignal, For, onMount, createEffect } from 'solid-js'
+import { Component, createSignal, For, createEffect } from 'solid-js'
 import SelectButton from './components/SelectButton'
 
-const pathToImage = (path) => {
-  return new Promise(resolve => {
+const pathToImage = (path: string) => {
+  return new Promise<HTMLImageElement>(resolve => {
     const img = new Image()
     img.src = path
     img.onload = () => {
@@ -34,26 +34,26 @@ const App: Component = () => {
     setHeadImages(fullHeadImages)
 
     // eyes
-    const eyesModules = await import.meta.glob('./assets/eyes/*.svg')
+    const eyesModules = import.meta.glob('./assets/eyes/*.svg')
     const eyesValues = Object.values(eyesModules).map(m => m())
     const fullEyesImages = await Promise.all(eyesValues)
     setEyesImages(fullEyesImages)
 
     // mouth
-    const mouthModules = await import.meta.glob('./assets/mouth/*.svg')
+    const mouthModules = import.meta.glob('./assets/mouth/*.svg')
     const mouthValues = Object.values(mouthModules).map(m => m())
     const fullMouthImages = await Promise.all(mouthValues)
     setMouthImages(fullMouthImages)
 
     // detail
-    const detailModules = await import.meta.glob('./assets/details/*.svg')
+    const detailModules = import.meta.glob('./assets/details/*.svg')
     const detailValues = Object.values(detailModules).map(m => m())
     const fullDetailImages = await Promise.all(detailValues)
     setDetailImages(fullDetailImages)
   }
   loadImage()
 
-  let canvas, canvasSize = 32;
+  let canvas: HTMLCanvasElement, canvasSize = 32;
 
   createEffect(() => {
     const headPath = selectedHeadImage()
@@ -70,20 +70,20 @@ const App: Component = () => {
       })
     })
   })
-  const handleClickHead = (i) => {
+  const handleClickHead = (i: number) => {
     setSelectedHead(i)
   }
-  const handleClickEyes = (i) => {
+  const handleClickEyes = (i: number) => {
     setSelectedEyes(i)
   }
-  const handleClickMouth = (i) => {
+  const handleClickMouth = (i: number) => {
     setSelectedMouth(i)
   }
-  const handleClickDetail = (i) => {
+  const handleClickDetail = (i: number) => {
     setSelectedDetail(i)
   }
 
-  const randomInt = (min, max) => {
+  const randomInt = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min
   }
 
@@ -99,7 +99,7 @@ const App: Component = () => {
   }
 
   const exportImage = () => {
-    canvas.toBlob((blob) => {
+    canvas.toBlob((blob: Blob) => {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
