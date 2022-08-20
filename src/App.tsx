@@ -1,6 +1,8 @@
 import { Component, createSignal, createEffect, onMount } from 'solid-js'
 import { For } from 'solid-js'
 import SelectButton from './components/SelectButton'
+import Header from './components/Header'
+import Footer from './components/Footer'
 
 type SvgImageModule = typeof import('*.svg')
 type ImportModuleFunction = () => Promise<SvgImageModule>
@@ -67,10 +69,13 @@ const App: Component = () => {
       mouth: fullMouthImages,
       detail: fullDetailImages,
     })
+    getRandom()
   }
   
   // lifecycle
-  onMount(() => loadImage())
+  onMount(() => {
+    loadImage()
+  })
 
   let canvas: HTMLCanvasElement, imageSize = 160;
 
@@ -120,22 +125,43 @@ const App: Component = () => {
 
   return (
     <>
-      <div
+      <Header />
+      <main
         flex="~ col" items-center justify-center gap-4
-        max-w="65ch" p-12
-        mx-auto
-        border
+        max-w="65ch" px-6 py-12
+        mx-auto bg-white rounded-lg shadow-sm
+        md:px-24
       >
-        <div mt-8 border>
-          <canvas ref={canvas} width={imageSize} height={imageSize}></canvas>
+        <div pos-relative p-6 border-2 border-gray-100 rounded-lg>
+          <canvas ref={canvas} width={imageSize} height={imageSize} rounded-lg></canvas>
         </div>
-        <div border w-full>
-          <header flex items-center gap-3 p-4 border-b>
+        <div flex h-12 gap-2>
+          <div
+            flex items-center justify-center w-12 rounded-full
+            bg-gray-100 hover:bg-red-200 cursor-pointer
+            onClick={getRandom}
+          >
+            <div i-material-symbols-refresh text-2xl />
+          </div>
+          <div
+            inline-flex px-3 items-center gap-1
+            rounded-full
+            cursor-pointer
+            bg-gray-100 hover:bg-red-200 cursor-pointer
+            onClick={() => exportImage()}
+          >
+            <div i-material-symbols-download-rounded text-2xl />
+            <span font-bold mr-1>Export</span>
+          </div>
+        </div>
+        <div w-full mt-4>
+          <header flex items-center gap-3 p-4 border-b border-gray-100 justify-center>
             <For each={tabs}>
               {item => (
                 <div 
-                  p-2 border
-                  class={selectedTab() === item ? 'border-red-500' : ''}
+                  p-2 rounded-lg cursor-pointer
+                  hover:bg-red-200
+                  class={selectedTab() === item ? 'bg-red-200' : 'bg-gray-100'}
                   onClick={() => setSelectedTab(item)}
                 >
                   <img src={selectedImage()[item]} h-12></img>
@@ -144,24 +170,24 @@ const App: Component = () => {
             </For>
           </header>
           <main p-4>
-            <div flex="~ row wrap" gap-2>
+            <div flex="~ row wrap" gap-2 justify-center>
               <For each={images()[selectedTab()]}>
                 {(item, index) => (
-                  <SelectButton highlight={() => index() === selectedIndex()[selectedTab()]}>
-                    <img onClick={[handleSelectItem, {tab: selectedTab(), index }]} src={item} alt=""></img>
+                  <SelectButton 
+                    highlight={() => index() === selectedIndex()[selectedTab()]}
+                    onClick={[handleSelectItem, {tab: selectedTab(), index }]}
+                  >
+                    <img src={item} alt=""></img>
                   </SelectButton>
                 )}
               </For>
             </div>
           </main>
         </div>
-        <div>
-          <button onClick={getRandom}>Random</button>
-          <button onClick={() => exportImage()}>Export</button>
-        </div>
-      </div>
+      </main>
+      <Footer />
     </>
-  );
-};
+  )
+}
 
-export default App;
+export default App
