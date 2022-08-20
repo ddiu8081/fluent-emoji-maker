@@ -1,5 +1,7 @@
-import { Component, createSignal, For, createEffect } from 'solid-js'
+import { Component, createSignal, For, createEffect, onMount } from 'solid-js'
 import SelectButton from './components/SelectButton'
+
+type SvgImageModule = typeof import('*.svg')
 
 const pathToImage = (path: string) => {
   return new Promise<HTMLImageElement>(resolve => {
@@ -9,6 +11,12 @@ const pathToImage = (path: string) => {
       resolve(img)
     }
   })
+}
+
+const resolveImportGlobModule = async (modules: (() => Promise<SvgImageModule>)[]) => {
+  const loadedModules = await Promise.all(modules.map(module => module()))
+
+  return loadedModules.map(module => module.default)
 }
 
 const App: Component = () => {
@@ -21,34 +29,30 @@ const App: Component = () => {
   const [selectedEyes, setSelectedEyes] = createSignal(0);
   const [selectedMouth, setSelectedMouth] = createSignal(0);
   const [selectedDetail, setSelectedDetail] = createSignal(0);
-  const selectedHeadImage = () => headImages()[selectedHead()]?.default
-  const selectedEyesImage = () => eyesImages()[selectedEyes()]?.default
-  const selectedMouthImage = () => mouthImages()[selectedMouth()]?.default
-  const selectedDetailImage = () => detailImages()[selectedDetail()]?.default
+  const selectedHeadImage = () => headImages()[selectedHead()]
+  const selectedEyesImage = () => eyesImages()[selectedEyes()]
+  const selectedMouthImage = () => mouthImages()[selectedMouth()]
+  const selectedDetailImage = () => detailImages()[selectedDetail()]
 
   const loadImage = async () => {
     // head
-    const headModules = import.meta.glob('./assets/head/*.svg')
-    const headValues = Object.values(headModules).map(m => m())
-    const fullHeadImages = await Promise.all(headValues)
+    const headModules = import.meta.glob<SvgImageModule>('./assets/head/*.svg')
+    const fullHeadImages = await resolveImportGlobModule(Object.values(headModules))
     setHeadImages(fullHeadImages)
 
     // eyes
-    const eyesModules = import.meta.glob('./assets/eyes/*.svg')
-    const eyesValues = Object.values(eyesModules).map(m => m())
-    const fullEyesImages = await Promise.all(eyesValues)
+    const eyesModules = import.meta.glob<SvgImageModule>('./assets/eyes/*.svg')
+    const fullEyesImages = await resolveImportGlobModule(Object.values(eyesModules))
     setEyesImages(fullEyesImages)
 
     // mouth
-    const mouthModules = import.meta.glob('./assets/mouth/*.svg')
-    const mouthValues = Object.values(mouthModules).map(m => m())
-    const fullMouthImages = await Promise.all(mouthValues)
+    const mouthModules = import.meta.glob<SvgImageModule>('./assets/mouth/*.svg')
+    const fullMouthImages = await resolveImportGlobModule(Object.values(mouthModules))
     setMouthImages(fullMouthImages)
 
     // detail
-    const detailModules = import.meta.glob('./assets/details/*.svg')
-    const detailValues = Object.values(detailModules).map(m => m())
-    const fullDetailImages = await Promise.all(detailValues)
+    const detailModules = import.meta.glob<SvgImageModule>('./assets/details/*.svg')
+    const fullDetailImages = await resolveImportGlobModule(Object.values(detailModules))
     setDetailImages(fullDetailImages)
   }
   loadImage()
@@ -117,7 +121,7 @@ const App: Component = () => {
         <For each={headImages()}>
           {(item, index) => (
             <SelectButton highlight={() => index() === selectedHead()}>
-              <img onClick={[handleClickHead, index]} src={item.default} alt=""></img>
+              <img onClick={[handleClickHead, index]} src={item} alt=""></img>
             </SelectButton>
           )}
         </For>
@@ -127,7 +131,7 @@ const App: Component = () => {
         <For each={eyesImages()}>
           {(item, index) => (
             <SelectButton index={index()} highlight={() => index() === selectedEyes()}>
-              <img onClick={[handleClickEyes, index]} src={item.default} alt=""></img>
+              <img onClick={[handleClickEyes, index]} src={item} alt=""></img>
             </SelectButton>
           )}
         </For>
@@ -137,7 +141,7 @@ const App: Component = () => {
         <For each={mouthImages()}>
           {(item, index) => (
             <SelectButton index={index()} highlight={() => index() === selectedMouth()}>
-              <img onClick={[handleClickMouth, index]} src={item.default} alt=""></img>
+              <img onClick={[handleClickMouth, index]} src={item} alt=""></img>
             </SelectButton>
           )}
         </For>
@@ -147,7 +151,7 @@ const App: Component = () => {
         <For each={detailImages()}>
           {(item, index) => (
             <SelectButton index={index()} highlight={() => index() === selectedDetail()}>
-              <img onClick={[handleClickDetail, index]} src={item.default} alt=""></img>
+              <img onClick={[handleClickDetail, index]} src={item} alt=""></img>
             </SelectButton>
           )}
         </For>
