@@ -90,8 +90,6 @@ const App: Component = () => {
     Promise.all([pathToImage(headPath), pathToImage(eyesPath), pathToImage(mouthPath), pathToImage(detailPath)]).then(images => {
       const ctx = canvas.getContext('2d')
       ctx.clearRect(0, 0, imageSize, imageSize)
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(0, 0, imageSize, imageSize)
       images.forEach(img => {
         img && ctx.drawImage(img, 0, 0, imageSize, imageSize)
       })
