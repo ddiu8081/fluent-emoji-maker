@@ -1,4 +1,5 @@
-import { Component, createSignal, For, createEffect, onMount } from 'solid-js'
+import { Component, createSignal, createEffect, onMount } from 'solid-js'
+import { For } from 'solid-js'
 import SelectButton from './components/SelectButton'
 
 type SvgImageModule = typeof import('*.svg')
@@ -21,74 +22,76 @@ const resolveImportGlobModule = async (modules: Record<string, ImportModuleFunct
   return loadedModules.map(module => module.default)
 }
 
-const App: Component = () => {
-  const [headImages, setHeadImages] = createSignal([]);
-  const [eyesImages, setEyesImages] = createSignal([]);
-  const [mouthImages, setMouthImages] = createSignal([]);
-  const [detailImages, setDetailImages] = createSignal([]);
+type EmojiSlice = 'head' | 'eyes' | 'mouth' | 'detail'
+const tabs: EmojiSlice[] = ['head', 'eyes', 'mouth', 'detail']
 
-  const [selectedHead, setSelectedHead] = createSignal(0);
-  const [selectedEyes, setSelectedEyes] = createSignal(0);
-  const [selectedMouth, setSelectedMouth] = createSignal(0);
-  const [selectedDetail, setSelectedDetail] = createSignal(0);
-  const selectedHeadImage = () => headImages()[selectedHead()]
-  const selectedEyesImage = () => eyesImages()[selectedEyes()]
-  const selectedMouthImage = () => mouthImages()[selectedMouth()]
-  const selectedDetailImage = () => detailImages()[selectedDetail()]
+const App: Component = () => {
+  const [selectedTab, setSelectedTab] = createSignal<EmojiSlice>('head')
+  const [images, setImages] = createSignal({
+    head: [],
+    eyes: [],
+    mouth: [],
+    detail: [],
+  })
+  const [selectedIndex, setSelectedIndex] = createSignal({
+    head: 0,
+    eyes: 0,
+    mouth: 0,
+    detail: 0,
+  })
+  const selectedImage = () => {
+    return {
+      head: images().head[selectedIndex().head],
+      eyes: images().eyes[selectedIndex().eyes],
+      mouth: images().mouth[selectedIndex().mouth],
+      detail: images().detail[selectedIndex().detail],
+    }
+  }
 
   const loadImage = async () => {
     // head
     const headModules = import.meta.glob<SvgImageModule>('./assets/head/*.svg')
     const fullHeadImages = await resolveImportGlobModule(headModules)
-    setHeadImages(fullHeadImages)
-
     // eyes
     const eyesModules = import.meta.glob<SvgImageModule>('./assets/eyes/*.svg')
     const fullEyesImages = await resolveImportGlobModule(eyesModules)
-    setEyesImages(fullEyesImages)
-
     // mouth
     const mouthModules = import.meta.glob<SvgImageModule>('./assets/mouth/*.svg')
     const fullMouthImages = await resolveImportGlobModule(mouthModules)
-    setMouthImages(fullMouthImages)
-
     // detail
     const detailModules = import.meta.glob<SvgImageModule>('./assets/details/*.svg')
     const fullDetailImages = await resolveImportGlobModule(detailModules)
-    setDetailImages(fullDetailImages)
+    setImages({
+      head: fullHeadImages,
+      eyes: fullEyesImages,
+      mouth: fullMouthImages,
+      detail: fullDetailImages,
+    })
   }
   
   // lifecycle
   onMount(() => loadImage())
 
-  let canvas: HTMLCanvasElement, canvasSize = 32;
+  let canvas: HTMLCanvasElement, imageSize = 160;
 
   createEffect(() => {
-    const headPath = selectedHeadImage()
-    const eyesPath = selectedEyesImage()
-    const mouthPath = selectedMouthImage()
-    const detailPath = selectedDetailImage()
+    const headPath = selectedImage().head
+    const eyesPath = selectedImage().eyes
+    const mouthPath = selectedImage().mouth
+    const detailPath = selectedImage().detail
     Promise.all([pathToImage(headPath), pathToImage(eyesPath), pathToImage(mouthPath), pathToImage(detailPath)]).then(images => {
       const ctx = canvas.getContext('2d')
-      ctx.clearRect(0, 0, canvasSize, canvasSize)
+      ctx.clearRect(0, 0, imageSize, imageSize)
       ctx.fillStyle = '#fff';
-      ctx.fillRect(0, 0, canvasSize, canvasSize)
+      ctx.fillRect(0, 0, imageSize, imageSize)
       images.forEach(img => {
-        ctx.drawImage(img, 0, 0)
+        ctx.drawImage(img, 0, 0, imageSize, imageSize)
       })
     })
   })
-  const handleClickHead = (i: number) => {
-    setSelectedHead(i)
-  }
-  const handleClickEyes = (i: number) => {
-    setSelectedEyes(i)
-  }
-  const handleClickMouth = (i: number) => {
-    setSelectedMouth(i)
-  }
-  const handleClickDetail = (i: number) => {
-    setSelectedDetail(i)
+
+  const handleSelectItem = ({tab, index}) => {
+    setSelectedIndex({ ...selectedIndex(), [tab]: index() })
   }
 
   const randomInt = (min: number, max: number) => {
@@ -96,14 +99,13 @@ const App: Component = () => {
   }
 
   const getRandom = () => {
-    const head = randomInt(0, headImages().length - 1)
-    const eyes = randomInt(0, eyesImages().length - 1)
-    const mouth = randomInt(0, mouthImages().length - 1)
-    const detail = randomInt(0, detailImages().length - 1)
-    setSelectedHead(head)
-    setSelectedEyes(eyes)
-    setSelectedMouth(mouth)
-    setSelectedDetail(detail)
+    const randomIndexes = {
+      head: randomInt(0, images().head.length - 1),
+      eyes: randomInt(0, images().eyes.length - 1),
+      mouth: randomInt(0, images().mouth.length - 1),
+      detail: randomInt(0, images().detail.length - 1),
+    }
+    setSelectedIndex(randomIndexes)
   }
 
   const exportImage = () => {
@@ -118,56 +120,45 @@ const App: Component = () => {
 
   return (
     <>
-      <h1 text="2xl" font="bold">Fluent Emoji Maker</h1>
-
-      <h2 mt-4 text-sm font-bold>Head</h2>
-      <div flex="~ row wrap" gap-2>
-        <For each={headImages()}>
-          {(item, index) => (
-            <SelectButton highlight={() => index() === selectedHead()}>
-              <img onClick={[handleClickHead, index]} src={item} alt=""></img>
-            </SelectButton>
-          )}
-        </For>
-      </div>
-      <h2 mt-4 text-sm font-bold>Eyes</h2>
-      <div flex="~ row wrap" gap-2>
-        <For each={eyesImages()}>
-          {(item, index) => (
-            <SelectButton index={index()} highlight={() => index() === selectedEyes()}>
-              <img onClick={[handleClickEyes, index]} src={item} alt=""></img>
-            </SelectButton>
-          )}
-        </For>
-      </div>
-      <h2 mt-4 text-sm font-bold>Mouth</h2>
-      <div flex="~ row wrap" gap-2>
-        <For each={mouthImages()}>
-          {(item, index) => (
-            <SelectButton index={index()} highlight={() => index() === selectedMouth()}>
-              <img onClick={[handleClickMouth, index]} src={item} alt=""></img>
-            </SelectButton>
-          )}
-        </For>
-      </div>
-      <h2 mt-4 text-sm font-bold>Detail</h2>
-      <div flex="~ row wrap" gap-2>
-        <For each={detailImages()}>
-          {(item, index) => (
-            <SelectButton index={index()} highlight={() => index() === selectedDetail()}>
-              <img onClick={[handleClickDetail, index]} src={item} alt=""></img>
-            </SelectButton>
-          )}
-        </For>
-      </div>
-
-      <div mt-8 border h-32>
-        <canvas ref={canvas} width={canvasSize} height={canvasSize}></canvas>
-      </div>
-
-      <div mt-4>
-        <button onClick={getRandom}>Random</button>
-        <button onClick={() => exportImage()}>Export</button>
+      <div
+        flex="~ col" items-center justify-center gap-4
+        max-w="65ch" p-12
+        mx-auto
+        border
+      >
+        <div mt-8 border>
+          <canvas ref={canvas} width={imageSize} height={imageSize}></canvas>
+        </div>
+        <div border w-full>
+          <header flex items-center gap-3 p-4 border-b>
+            <For each={tabs}>
+              {item => (
+                <div 
+                  p-2 border
+                  class={selectedTab() === item ? 'border-red-500' : ''}
+                  onClick={() => setSelectedTab(item)}
+                >
+                  <img src={selectedImage()[item]} h-12></img>
+                </div>
+              )}
+            </For>
+          </header>
+          <main p-4>
+            <div flex="~ row wrap" gap-2>
+              <For each={images()[selectedTab()]}>
+                {(item, index) => (
+                  <SelectButton highlight={() => index() === selectedIndex()[selectedTab()]}>
+                    <img onClick={[handleSelectItem, {tab: selectedTab(), index }]} src={item} alt=""></img>
+                  </SelectButton>
+                )}
+              </For>
+            </div>
+          </main>
+        </div>
+        <div>
+          <button onClick={getRandom}>Random</button>
+          <button onClick={() => exportImage()}>Export</button>
+        </div>
       </div>
     </>
   );
