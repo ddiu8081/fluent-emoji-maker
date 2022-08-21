@@ -23,10 +23,10 @@ export default () => {
         pos-absolute
         inline-flex justify-center items-center
         cursor-pointer
-        p-2 rounded-full op-90
-        hover:op-50
-        dark:text-white dark:op-50
-        hover="dark:op-90"
+        p-2 rounded-full
+        dark="text-[#f2f2f2] op-60"
+        hover="ring text-white dark:op-90 dark:bg-gray-100 bg-[#221212] dark:text-black"
+        transition
         onClick={handleToggleDark}
       >
         {
