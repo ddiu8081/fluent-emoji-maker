@@ -8,7 +8,7 @@ body {
 }
 
 .dark body {
-  background-color: #221212;
+  background-color: hsl(0, 0%, 15%);
 }
 
 a {
