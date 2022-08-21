@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@iconify-json/carbon': ^1.1.7
   '@iconify-json/material-symbols': ^1.1.14
   '@unocss/preset-attributify': ^0.45.8
   '@unocss/preset-icons': ^0.45.8
@@ -17,6 +18,7 @@ dependencies:
   solid-js: 1.4.8
 
 devDependencies:
+  '@iconify-json/carbon': 1.1.7
   '@iconify-json/material-symbols': 1.1.14
   '@unocss/preset-attributify': 0.45.8
   '@unocss/preset-icons': 0.45.8
@@ -369,6 +371,12 @@ packages:
     requiresBuild: true
     dev: true
     optional: true
+
+  /@iconify-json/carbon/1.1.7:
+    resolution: {integrity: sha512-QULSpNWKaX4auIbjITDynfALdJYvOOy/xZb+aLOqCgvpBcmbz5tbqvow4r25FWtVsi4FHVpNQ8vyJZXsD1Hlxg==}
+    dependencies:
+      '@iconify/types': 1.1.0
+    dev: true
 
   /@iconify-json/material-symbols/1.1.14:
     resolution: {integrity: sha512-xWw32NNz9S0zB5WXc3igQACvKm1e0uK7NRb5M/PdZhbvpzUvpWuUurlKQeROEyN1a9QTy1dKoc2THMnJ8B/ZPg==}

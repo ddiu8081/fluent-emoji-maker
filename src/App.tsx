@@ -131,15 +131,17 @@ const App: Component = () => {
         flex="~ col" items-center justify-center gap-4
         max-w="65ch" px-6 py-12
         mx-auto bg-white rounded-lg shadow-sm
+        dark:bg-dark
         md:px-24
       >
-        <div pos-relative p-6 border-2 border-gray-100 rounded-lg>
+        <div pos-relative p-6 border-2 border-gray-100 dark:border-gray-400 rounded-lg>
           <canvas ref={canvas} width={imageSize} height={imageSize} rounded-lg></canvas>
         </div>
         <div flex h-12 gap-2>
           <div
             flex items-center justify-center w-12 rounded-full
             bg-gray-100 hover:bg-red-200 cursor-pointer
+            hover="dark:bg-red-300"
             onClick={getRandom}
           >
             <div i-material-symbols-refresh text-2xl />
@@ -148,6 +150,7 @@ const App: Component = () => {
             inline-flex px-3 items-center gap-1
             rounded-full
             bg-gray-100 hover:bg-red-200 cursor-pointer
+            hover="dark:bg-red-300"
             onClick={() => exportImage()}
           >
             <div i-material-symbols-download-rounded text-2xl />
@@ -162,7 +165,8 @@ const App: Component = () => {
                   flex items-center justify-center
                   h-16 w-16 rounded-lg cursor-pointer
                   hover:bg-red-200
-                  class={selectedTab() === item ? 'bg-red-200' : 'bg-gray-100'}
+                  hover="dark:bg-red-300"
+                  class={selectedTab() === item ? 'bg-red-200 dark:bg-red-300' : 'bg-gray-100'}
                   onClick={() => setSelectedTab(item)}
                 >
                   <Show

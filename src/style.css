@@ -1,6 +1,14 @@
+html, body, #app {
+  transition: background-color .35s;
+}
+
 body {
   margin: 20px;
   background-color: #f2f2f2;
+}
+
+.dark body {
+  background-color: hsl(0, 0%, 15%);
 }
 
 a {
