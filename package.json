@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@iconify-json/carbon": "^1.1.7",
     "@iconify-json/material-symbols": "^1.1.14",
     "@unocss/preset-attributify": "^0.45.8",
     "@unocss/preset-icons": "^0.45.8",
