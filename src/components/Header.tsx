@@ -1,36 +1,21 @@
-import { createEffect } from "solid-js"
-import { isDark, setDark } from "../logic"
+import { createEffect } from 'solid-js'
+import colorSchemeStore from '../logic/colorScheme'
 
 export default () => {
-  createEffect(() => {
-    const node = document.querySelector('html')
-
-    if (isDark()) {
-      node?.classList.add('dark')
-      localStorage.setItem('dark', '1')
-    } else {
-      node?.classList.remove('dark')
-      localStorage.removeItem('dark')
-    }
-  })
-
-  const handleToggleDark = () => setDark((prev) => !prev)
+  const { showDark, toggleStoreScheme } = colorSchemeStore
 
   return (
     <header flex="~">
       <div
-        right-8
-        pos-absolute
+        pos-absolute top-8 right-8 p-1
         inline-flex justify-center items-center
-        cursor-pointer
-        p-2 rounded-full
-        dark="text-[#f2f2f2] op-60"
-        hover="ring text-white dark:op-90 dark:bg-gray-100 bg-[#221212] dark:text-black"
-        transition
-        onClick={handleToggleDark}
+       text-gray-600 dark:text-gray-200 op-50
+        hover="op-100"
+        cursor-pointer transition-opacity
+        onClick={toggleStoreScheme}
       >
         {
-          isDark() ? <i text-2xl i-carbon:sun /> : <i text-2xl i-carbon:moon />
+          showDark() ? <i text-2xl i-carbon:moon /> : <i text-2xl i-carbon:sun />
         }
       </div>
     </header>
