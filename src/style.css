@@ -1,10 +1,12 @@
 html {
   margin: 20px;
   background-color: #f2f2f2;
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
 }
 
 html.dark {
   background-color: #333333;
+  color-scheme: dark;
 }
 
 a {
