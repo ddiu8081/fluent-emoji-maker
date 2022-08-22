@@ -9,7 +9,7 @@ export default () => {
       <div
         pos-absolute top-8 right-8 p-1
         inline-flex justify-center items-center
-       text-gray-600 dark:text-gray-200 op-50
+       text-neutral-600 dark:text-neutral-200 op-50
         hover="op-100"
         cursor-pointer transition-opacity
         onClick={toggleStoreScheme}
