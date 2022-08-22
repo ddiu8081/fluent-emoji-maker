@@ -10,3 +10,11 @@ html.dark {
 a {
   text-decoration: none;
 }
+
+@keyframes slidein {
+  60% { transform: scale(1.06); }
+}
+
+canvas.animation {
+  animation: slidein .3s alternate;
+}

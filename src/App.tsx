@@ -93,6 +93,10 @@ const App: Component = () => {
       images.forEach(img => {
         img && ctx.drawImage(img, 0, 0, imageSize, imageSize)
       })
+      canvas.classList.add('animation')
+      setTimeout(() => {
+        canvas.classList.remove('animation')
+      }, 500)
     })
   })
 
@@ -134,8 +138,8 @@ const App: Component = () => {
         dark:bg-dark
         md:px-24
       >
-        <div pos-relative p-6 border-2 border-neutral-400 border-op-20 rounded-2xl>
-          <canvas ref={canvas} width={imageSize} height={imageSize} rounded-lg></canvas>
+        <div flex items-center justify-center w="200px" h="200px" border-2 border-neutral-400 border-op-20 rounded-2xl>
+          <canvas ref={canvas} width={imageSize} height={imageSize} rounded-lg class="animation"></canvas>
         </div>
         <div flex h-12 gap-2>
           <div
