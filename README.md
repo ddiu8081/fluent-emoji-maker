@@ -6,7 +6,7 @@
 
 Generate your own Fluent Emojis!
 
-[emoji.ddiu.io](https://emoji.ddiu.io)
+[fluent-emoji.ddiu.io](https://fluent-emoji.ddiu.io/)
 
 ## Credits
 
