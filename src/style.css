@@ -24,15 +24,15 @@ canvas.animation {
 .glow-bg::after {
   position: absolute;
   content: "";
-  top: -40%;
+  top: -10%;
   left: 0;
   right: 0;
   z-index: -1;
-  height: 100%;
+  height: 50%;
   width: 100%;
   filter: blur(5vw);
-  transform: scale(0.7);
-  background: linear-gradient(to right, #fde68a, #fed7aa, #fda4af, #f9a8d4, #93c5fd, #5eead4);
-  background-size: 200% 200%;
-  opacity: 0.16;
+  transform: scale(0.74);
+  background: linear-gradient(60deg, #fde68a, #fed7aa, #fda4af, #f9a8d4, #93c5fd, #5eead4);
+  /* background-size: 200% 200%; */
+  opacity: 0.2;
 }
