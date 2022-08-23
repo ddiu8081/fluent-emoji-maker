@@ -1,7 +1,7 @@
 html {
-  margin: 20px;
-  background-color: #f2f2f2;
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  margin: 16px 20px;
+  background-color: #f5f3ff;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 }
 
 html.dark {
@@ -19,4 +19,19 @@ a {
 
 canvas.animation {
   animation: slidein .3s alternate;
+}
+
+.glow-bg {
+  position: absolute;
+  content: "";
+  top: -40%;
+  left: 0;
+  right: 0;
+  z-index: -1;
+  height: 100%;
+  width: 100%;
+  filter: blur(5vw);
+  transform: scale(0.7);
+  background: linear-gradient(to right, #fde68a, #fed7aa, #ff5770, #e4428d, #93c5fd, #5eead4);
+  opacity: 0.1;
 }

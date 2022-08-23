@@ -134,7 +134,7 @@ const App: Component = () => {
       <main
         flex="~ col" items-center justify-center gap-4
         max-w="65ch" px-6 py-12
-        mx-auto bg-white rounded-lg shadow-sm
+        mx-auto bg-white rounded-lg shadow-lg bg-op-80
         dark:bg-dark
         md:px-24
       >
