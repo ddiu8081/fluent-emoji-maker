@@ -3,6 +3,7 @@ import { For, Switch, Match, Show } from 'solid-js'
 import SelectButton from './components/SelectButton'
 import Header from './components/Header'
 import Footer from './components/Footer'
+import a from './assets/details/1.svg'
 
 type SvgImageModule = typeof import('*.svg')
 type ImportModuleFunction = () => Promise<SvgImageModule>
@@ -12,9 +13,12 @@ const pathToImage = (path: string) => {
     if (path === '') {
       resolve(null)
     }
-    const img = new Image()
+    // const imgDom = document.getElementById('oooo')
+    // resolve(imgDom)
+    const img = new Image(400, 400)
     img.src = path
-    img.onload = () => {
+    img.onload = (e) => {
+      console.log(e)
       resolve(img)
     }
   })
@@ -80,7 +84,7 @@ const App: Component = () => {
     loadImage()
   })
 
-  let canvas: HTMLCanvasElement, imageSize = 160;
+  let canvas: HTMLCanvasElement, canvasSize = 640;
 
   createEffect(() => {
     const headPath = selectedImage().head
@@ -89,9 +93,9 @@ const App: Component = () => {
     const detailPath = selectedImage().detail
     Promise.all([pathToImage(headPath), pathToImage(eyesPath), pathToImage(mouthPath), pathToImage(detailPath)]).then(images => {
       const ctx = canvas.getContext('2d')
-      ctx.clearRect(0, 0, imageSize, imageSize)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
       images.forEach(img => {
-        img && ctx.drawImage(img, 0, 0, imageSize, imageSize)
+        img && ctx.drawImage(img, 0, 0, canvasSize, canvasSize)
       })
       canvas.classList.add('animation')
       setTimeout(() => {
@@ -123,7 +127,7 @@ const App: Component = () => {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${Date.now()}.png`
+      a.download = `emoji_${Date.now()}.png`
       a.click()
     })
   }
@@ -140,7 +144,7 @@ const App: Component = () => {
         md:px-24
       >
         <div flex items-center justify-center w="200px" h="200px" border-2 border-neutral-400 border-op-20 rounded-2xl>
-          <canvas ref={canvas} width={imageSize} height={imageSize} rounded-lg class="animation"></canvas>
+          <canvas ref={canvas} width={canvasSize} height={canvasSize} w="160px" h="160px" class="animation"></canvas>
         </div>
         <div flex h-12 gap-2>
           <div
@@ -199,7 +203,7 @@ const App: Component = () => {
                             onClick={[handleSelectItem, {tab: selectedTab(), index: index() }]}
                           >
                             <Show when={item}>
-                              <img src={item} alt={selectedTab() + index()} h-8 w-8></img>
+                              <img src={item} alt={selectedTab() + index()} h-10 w-10></img>
                             </Show>
                           </SelectButton>
                         )}
