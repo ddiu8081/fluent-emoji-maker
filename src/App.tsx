@@ -3,7 +3,6 @@ import { For, Switch, Match, Show } from 'solid-js'
 import SelectButton from './components/SelectButton'
 import Header from './components/Header'
 import Footer from './components/Footer'
-import a from './assets/details/1.svg'
 
 type SvgImageModule = typeof import('*.svg')
 type ImportModuleFunction = () => Promise<SvgImageModule>
@@ -13,8 +12,6 @@ const pathToImage = (path: string) => {
     if (path === '') {
       resolve(null)
     }
-    // const imgDom = document.getElementById('oooo')
-    // resolve(imgDom)
     const img = new Image(400, 400)
     img.src = path
     img.onload = (e) => {
@@ -31,20 +28,22 @@ const resolveImportGlobModule = async (modules: Record<string, ImportModuleFunct
   return loadedModules.map(module => module.default)
 }
 
-type EmojiSlice = 'head' | 'eyes' | 'mouth' | 'detail'
-const tabs: EmojiSlice[] = ['head', 'eyes', 'mouth', 'detail']
+type EmojiSlice = 'head' | 'eyes' | 'eyebrows' | 'mouth' | 'detail'
+const tabs: EmojiSlice[] = ['head', 'eyes', 'eyebrows', 'mouth', 'detail']
 
 const App: Component = () => {
   const [selectedTab, setSelectedTab] = createSignal<EmojiSlice>('head')
   const [images, setImages] = createSignal({
     head: [],
     eyes: [],
+    eyebrows: [],
     mouth: [],
     detail: [],
   })
   const [selectedIndex, setSelectedIndex] = createSignal({
     head: 0,
     eyes: 0,
+    eyebrows: 0,
     mouth: 0,
     detail: 0,
   })
@@ -52,6 +51,7 @@ const App: Component = () => {
     return {
       head: images().head[selectedIndex().head],
       eyes: images().eyes[selectedIndex().eyes],
+      eyebrows: images().eyebrows[selectedIndex().eyebrows],
       mouth: images().mouth[selectedIndex().mouth],
       detail: images().detail[selectedIndex().detail],
     }
@@ -64,6 +64,9 @@ const App: Component = () => {
     // eyes
     const eyesModules = import.meta.glob<SvgImageModule>('./assets/eyes/*.svg')
     const fullEyesImages = await resolveImportGlobModule(eyesModules)
+    // eyebrows
+    const eyebrowsModules = import.meta.glob<SvgImageModule>('./assets/eyebrows/*.svg')
+    const fullEyebrowsImages = await resolveImportGlobModule(eyebrowsModules)
     // mouth
     const mouthModules = import.meta.glob<SvgImageModule>('./assets/mouth/*.svg')
     const fullMouthImages = await resolveImportGlobModule(mouthModules)
@@ -73,6 +76,7 @@ const App: Component = () => {
     setImages({
       head: fullHeadImages,
       eyes: ['', ...fullEyesImages],
+      eyebrows: ['', ...fullEyebrowsImages],
       mouth: ['', ...fullMouthImages],
       detail: ['', ...fullDetailImages],
     })
@@ -89,9 +93,16 @@ const App: Component = () => {
   createEffect(() => {
     const headPath = selectedImage().head
     const eyesPath = selectedImage().eyes
+    const eyebrowsPath = selectedImage().eyebrows
     const mouthPath = selectedImage().mouth
     const detailPath = selectedImage().detail
-    Promise.all([pathToImage(headPath), pathToImage(eyesPath), pathToImage(mouthPath), pathToImage(detailPath)]).then(images => {
+    Promise.all([
+      pathToImage(headPath),
+      pathToImage(eyesPath),
+      pathToImage(eyebrowsPath),
+      pathToImage(mouthPath),
+      pathToImage(detailPath)
+    ]).then(images => {
       const ctx = canvas.getContext('2d')
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       images.forEach(img => {
@@ -116,6 +127,7 @@ const App: Component = () => {
     const randomIndexes = {
       head: randomInt(0, images().head.length - 1),
       eyes: randomInt(0, images().eyes.length - 1),
+      eyebrows: randomInt(0, images().eyebrows.length - 1),
       mouth: randomInt(0, images().mouth.length - 1),
       detail: randomInt(0, images().detail.length - 1),
     }
@@ -170,7 +182,7 @@ const App: Component = () => {
           </div>
         </div>
         <div w-full mt-4>
-          <header flex items-center gap-3 p-4 border-b border-neutral-400 border-op-20 justify-center>
+          <header flex flex-wrap items-center gap-3 p-4 border-b border-neutral-400 border-op-20 justify-center>
             <For each={tabs}>
               {(item, index) => (
                 <div 
@@ -191,7 +203,7 @@ const App: Component = () => {
             </For>
           </header>
           <main p-4>
-            <div flex="~ row wrap" gap-2 justify-center>
+            <div flex="~ wrap" gap-2 justify-center>
               <Switch>
                 <For each={Object.keys(images())}>
                   {(tab: EmojiSlice) => (
