@@ -21,7 +21,7 @@ canvas.animation {
   animation: slidein .3s alternate;
 }
 
-.glow-bg {
+.glow-bg::after {
   position: absolute;
   content: "";
   top: -40%;
@@ -32,6 +32,7 @@ canvas.animation {
   width: 100%;
   filter: blur(5vw);
   transform: scale(0.7);
-  background: linear-gradient(to right, #fde68a, #fed7aa, #ff5770, #e4428d, #93c5fd, #5eead4);
-  opacity: 0.1;
+  background: linear-gradient(to right, #fde68a, #fed7aa, #fda4af, #f9a8d4, #93c5fd, #5eead4);
+  background-size: 200% 200%;
+  opacity: 0.16;
 }

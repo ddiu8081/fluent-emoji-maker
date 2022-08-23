@@ -21,7 +21,7 @@ export default () => {
         </div>
       </header>
       <Show when={!showDark()}>
-        <div class="glow-bg"></div>
+        <div hidden md="block" class="glow-bg"></div>
       </Show>
     </>
   )
