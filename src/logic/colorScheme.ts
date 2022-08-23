@@ -18,11 +18,7 @@ function createColorScheme() {
 
   const toggleStoreScheme = () => {
     const newScheme = showDark() ? 'light' : 'dark'
-    console.log('newScheme', newScheme)
-    console.log('showDark', showDark())
-    console.log('preferredDark', preferredDark())
     const newStoreScheme = showDark() !== preferredDark() ? 'auto' : newScheme
-    console.log('newStoreScheme', newStoreScheme)
 
     setStoreColorScheme(newStoreScheme)
     localStorage.setItem('color-scheme', newStoreScheme)
