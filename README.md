@@ -10,5 +10,5 @@ Generate your own Fluent Emojis!
 
 ## Credits
 
-Images are from Microsoft [Fluent Emoji](https://github.com/microsoft/fluentui-emoji).
+Assets are from [Fluent Emoji](https://github.com/microsoft/fluentui-emoji) by Microsoft. Remixed and partially modified.
 
