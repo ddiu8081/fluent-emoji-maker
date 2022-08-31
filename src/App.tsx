@@ -134,14 +134,23 @@ const App: Component = () => {
     setSelectedIndex(randomIndexes)
   }
 
-  const exportImage = () => {
-    canvas.toBlob((blob: Blob) => {
+  const exportImage = (blob: Blob) => {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `emoji_${Date.now()}.png`
+      a.download = `emoji_${Date.now()}`
       a.click()
-    })
+  }
+  
+  const toSVGBlob = async () => {
+      const parser = new DOMParser()
+      const documents = await Promise.all(Object.values(selectedImage()).map(image => fetch(image).then(response => response.text())))
+      const svg = (
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {documents.flatMap(document => [...parser.parseFromString(document, 'image/svg+xml').documentElement.childNodes])}
+        </svg>
+      ) as HTMLElement
+      return new Blob([svg.outerHTML], {type: 'image/svg+xml'})
   }
 
   return (
@@ -175,10 +184,21 @@ const App: Component = () => {
             text-black dark:text-white
             cursor-pointer transition-colors
             hover="bg-violet-200 dark:bg-violet-400"
-            onClick={() => exportImage()}
+            onClick={() => canvas.toBlob(exportImage)}
           >
             <div i-material-symbols-download-rounded text-2xl />
-            <span font-bold mr-1>Export</span>
+            <span font-bold mr-1>Export PNG</span>
+          </div>
+          <div
+            inline-flex px-3 items-center gap-1 rounded-full
+            bg-neutral-100 dark:bg-neutral-600
+            text-black dark:text-white
+            cursor-pointer transition-colors
+            hover="bg-violet-200 dark:bg-violet-400"
+            onClick={() => toSVGBlob().then(exportImage)}
+          >
+            <div i-material-symbols-download-rounded text-2xl />
+            <span font-bold mr-1>Export SVG</span>
           </div>
         </div>
         <div w-full mt-4>
