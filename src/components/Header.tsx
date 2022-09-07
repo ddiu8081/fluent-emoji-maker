@@ -1,28 +1,28 @@
-import { Show } from 'solid-js'
-import colorSchemeStore from '../logic/colorScheme'
+import back from "../../public/back.png";
 
-export default () => {
-  const { showDark, toggleStoreScheme } = colorSchemeStore
-
+export default ({onDone,onBack}) => {
   return (
     <>
-      <header flex="~ row" mb-4 items-center justify-between>
-        <h1 font-extrabold tracking-wide text-neutral-800 dark:text-neutral-200>Fluent Emoji Maker</h1>
-        <div
-          inline-flex justify-center items-center p-1
-          text-neutral-600 dark:text-neutral-200 op-50
-          hover="op-100"
-          cursor-pointer transition-opacity
-          onClick={toggleStoreScheme}
-        >
-          {
-            showDark() ? <i text-2xl i-carbon:moon /> : <i text-2xl i-carbon:sun />
-          }
+      <header style={{width:'100vw'}} box-border flex h-14 items-center justify-between px-3>
+        <div font-extrabold tracking-wide w-5 h-5 onClick={onBack}>
+          <img src={back} alt="" w-full h-full />
         </div>
+        <button
+          w-16
+          h-8
+          text-sm
+          border-none
+          rounded-lg
+          text-white
+          style={{ background: "#6E64FF" }}
+          onClick={onDone}
+        >
+          Done
+        </button>
       </header>
-      <Show when={!showDark()}>
+      {/* <Show when={!showDark()}>
         <div hidden md="block" class="glow-bg"></div>
-      </Show>
+      </Show> */}
     </>
-  )
-}
+  );
+};

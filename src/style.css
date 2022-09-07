@@ -1,7 +1,7 @@
 html {
-  margin: 16px 20px;
-  background-color: #f5f3ff;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  background-color: #fff;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+    sans-serif;
 }
 
 html.dark {
@@ -14,25 +14,28 @@ a {
 }
 
 @keyframes slidein {
-  60% { transform: scale(1.06); }
+  60% {
+    transform: scale(1.06);
+  }
 }
 
 canvas.animation {
-  animation: slidein .3s alternate;
+  animation: slidein 0.3s alternate;
 }
 
-.glow-bg::after {
-  position: absolute;
-  content: "";
-  top: -10%;
-  left: 0;
-  right: 0;
-  z-index: -1;
-  height: 50%;
+.myLoading {
   width: 100%;
-  filter: blur(5vw);
-  transform: scale(0.74);
-  background: linear-gradient(60deg, #fde68a, #fed7aa, #fda4af, #f9a8d4, #93c5fd, #5eead4);
-  /* background-size: 200% 200%; */
-  opacity: 0.2;
+  background: linear-gradient(180deg, #ffd300 0%, #ffa700 100%);
+  animation: myfirst 2s linear;
+  height: 20px;
+  border-radius: 50px;
+}
+
+@keyframes myfirst {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
 }

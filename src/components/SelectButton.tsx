@@ -3,12 +3,13 @@ export default (props) => {
   const isHighlight = props.highlight;
   return (
     <div
-      flex items-center justify-center h-14 w-14
-      rounded-md
-      border border-2 cursor-pointer
+      flex items-center justify-center m-auto my-2
+      rounded-xl
+      cursor-pointer
       transition-colors
-      hover="bg-violet-200 dark:bg-violet-200 border-violet-400"
-      class={isHighlight() ? 'bg-violet-100 border-violet-400' : 'bg-neutral-100 dark:bg-neutral-600 border-transparent'}
+      // hover="bg-violet-200 dark:bg-violet-200 border-violet-400"
+      class={isHighlight() ? 'bg-gray-200' : ''}
+      style={{width:'23vw',height:'23vw'}}
       onClick={props.onClick}
     >
       {slot}

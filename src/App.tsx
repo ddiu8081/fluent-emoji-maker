@@ -2,20 +2,54 @@ import { Component, createSignal, createEffect, onMount } from 'solid-js'
 import { For, Switch, Match, Show } from 'solid-js'
 import SelectButton from './components/SelectButton'
 import Header from './components/Header'
-import Footer from './components/Footer'
+import random from "../public/random.png";
 
-type SvgImageModule = typeof import('*.svg')
-type ImportModuleFunction = () => Promise<SvgImageModule>
+function connectWebViewJavascriptBridge(callback) {
+  if (window.WebViewJavascriptBridge) {
+      callback(WebViewJavascriptBridge)
+  } else {
+      document.addEventListener(
+          'WebViewJavascriptBridgeReady'
+          , function() {
+              callback(WebViewJavascriptBridge)
+          },
+          false
+      );
+  }
+}
+connectWebViewJavascriptBridge(function(bridge) {
+  bridge.init(function(message, responseCallback) {
+      console.log('JS got a message', message);
+      let data = {
+          'Javascript Responds': '测试中文!'
+      };
+
+      if (responseCallback) {
+          console.log('JS responding with', data);
+          responseCallback(data);
+      }
+  });
+
+  bridge.registerHandler("functionInJs", function(data, responseCallback) {
+      if (responseCallback) {
+          let responseData = "Javascript Says Right back aka!";
+          responseCallback(responseData);
+      }
+  });
+})
+
+type PngImageModule = typeof import('*.png')
+type ImportModuleFunction = () => Promise<PngImageModule>
 
 const pathToImage = (path: string) => {
   return new Promise<HTMLImageElement | null>(resolve => {
     if (path === '') {
       resolve(null)
     }
-    const img = new Image(400, 400)
+    const img = new Image(512, 512)
     img.src = path
     img.onload = (e) => {
-      console.log(e)
+      // console.log(e)
       resolve(img)
     }
   })
@@ -33,6 +67,8 @@ const tabs: EmojiSlice[] = ['head', 'eyes', 'eyebrows', 'mouth', 'detail']
 
 const App: Component = () => {
   const [selectedTab, setSelectedTab] = createSignal<EmojiSlice>('head')
+  const [isShadow, setIsShadow] = createSignal<boolean>(false)
+  const [isHome, setIsHome] = createSignal<boolean>(true)
   const [images, setImages] = createSignal({
     head: [],
     eyes: [],
@@ -57,22 +93,29 @@ const App: Component = () => {
     }
   }
 
+  createEffect(()=>{
+    setTimeout(() => {
+      setIsHome(false)
+    }, 2000);
+  })
+
   const loadImage = async () => {
     // head
-    const headModules = import.meta.glob<SvgImageModule>('./assets/head/*.svg')
+    const headModules = import.meta.glob<PngImageModule>('./assets/head/*.png')
     const fullHeadImages = await resolveImportGlobModule(headModules)
     // eyes
-    const eyesModules = import.meta.glob<SvgImageModule>('./assets/eyes/*.svg')
+    const eyesModules = import.meta.glob<PngImageModule>('./assets/eyes/*.png')
     const fullEyesImages = await resolveImportGlobModule(eyesModules)
     // eyebrows
-    const eyebrowsModules = import.meta.glob<SvgImageModule>('./assets/eyebrows/*.svg')
+    const eyebrowsModules = import.meta.glob<PngImageModule>('./assets/eyebrows/*.png')
     const fullEyebrowsImages = await resolveImportGlobModule(eyebrowsModules)
     // mouth
-    const mouthModules = import.meta.glob<SvgImageModule>('./assets/mouth/*.svg')
+    const mouthModules = import.meta.glob<PngImageModule>('./assets/mouth/*.png')
     const fullMouthImages = await resolveImportGlobModule(mouthModules)
     // detail
-    const detailModules = import.meta.glob<SvgImageModule>('./assets/details/*.svg')
+    const detailModules = import.meta.glob<PngImageModule>('./assets/details/*.png')
     const fullDetailImages = await resolveImportGlobModule(detailModules)
+    
     setImages({
       head: fullHeadImages,
       eyes: ['', ...fullEyesImages],
@@ -88,7 +131,7 @@ const App: Component = () => {
     loadImage()
   })
 
-  let canvas: HTMLCanvasElement, canvasSize = 640;
+  let canvas: HTMLCanvasElement, canvasSize = 512;
 
   createEffect(() => {
     const headPath = selectedImage().head
@@ -113,10 +156,16 @@ const App: Component = () => {
         canvas.classList.remove('animation')
       }, 500)
     })
+   
+    
   })
 
   const handleSelectItem = ({tab, index}: {tab: string, index: number}) => {
-    setSelectedIndex({ ...selectedIndex(), [tab]: index })
+    if(selectedIndex()[tab]===index&&selectedTab()!=='head'){
+      setSelectedIndex({ ...selectedIndex(), [tab]: 0 })
+    }else{
+      setSelectedIndex({ ...selectedIndex(), [tab]: index })
+    }
   }
 
   const randomInt = (min: number, max: number) => {
@@ -134,64 +183,68 @@ const App: Component = () => {
     setSelectedIndex(randomIndexes)
   }
 
-  const exportImage = () => {
-    canvas.toBlob((blob: Blob) => {
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `emoji_${Date.now()}.png`
-      a.click()
-    })
+  
+  const onDone = () => {
+    window.WebViewJavascriptBridge.callHandle(
+      'openPage',
+       // 事件参数
+      {  
+        'page': 'publish',
+        'portal': 'emojimaker',
+        'data':{'image': canvas.toDataURL('image/webp',1)}
+      },
+      function(responseData) {
+        console.log(responseData);
+      }
+    );
+  }
+
+  const onBack = () => {
+    window.WebViewJavascriptBridge.callHandle(
+      'finishPage',
+      function(responseData) {
+        console.log(responseData);
+      }
+    );
   }
 
   return (
-    <>
-      <Header />
-      <main
-        flex="~ col" items-center justify-center gap-4
-        max-w="65ch" px-6 py-12
-        mx-auto bg-white rounded-lg bg-op-80
-        shadow="2xl black/10"
-        dark:bg-dark
-        md:px-24
-      >
-        <div flex items-center justify-center w="200px" h="200px" border-2 border-neutral-400 border-op-20 rounded-2xl>
-          <canvas ref={canvas} width={canvasSize} height={canvasSize} w="160px" h="160px" class="animation"></canvas>
-        </div>
-        <div flex h-12 gap-2>
-          <div
-            flex items-center justify-center w-12 rounded-full
-            bg-neutral-100 dark:bg-neutral-600
-            text-black dark:text-white
-            cursor-pointer transition-colors
-            hover="bg-violet-200 dark:bg-violet-400"
-            onClick={getRandom}
-          >
-            <div i-material-symbols-refresh text-2xl />
+    <div box-border overflow-hidden style={{'padding-top':'355px'}}>
+      <div z-2 class="fixed top-0 left-0">
+        <div z-2  style={{background:'#F2F3F4 '}}><Header onDone={onDone} onBack={onBack} /></div>
+        <div px-3 style={{background:'#F2F3F4'}}>
+          <div flex items-center justify-center w-50 h-50 border-2 border-neutral-500 border-op-20 rounded-2xl m-auto>
+              <canvas ref={canvas} width={canvasSize} height={canvasSize} w-45 h-45 class="animation"></canvas>
           </div>
-          <div
-            inline-flex px-3 items-center gap-1 rounded-full
-            bg-neutral-100 dark:bg-neutral-600
-            text-black dark:text-white
-            cursor-pointer transition-colors
-            hover="bg-violet-200 dark:bg-violet-400"
-            onClick={() => exportImage()}
-          >
-            <div i-material-symbols-download-rounded text-2xl />
-            <span font-bold mr-1>Export</span>
+          <div class='relative' h-6>
+            <div
+              flex items-center justify-center w-12 h-12 rounded-full
+              bg-neutral-400
+              text-black
+              cursor-pointer transition-colors
+              // hover="bg-violet-200"
+              class="absolute right-1 bottom-3"
+              onClick={getRandom}
+            >
+              <img src={random} alt="" w-6 h-6 />
+            </div>
           </div>
         </div>
-        <div w-full mt-4>
-          <header flex flex-wrap items-center gap-3 p-4 border-b border-neutral-400 border-op-20 justify-center>
+        <header flex z-1 bg-white items-center w-full box-border px-4 py-2 justify-around  class={isShadow()?'shadow-md':''} >
             <For each={tabs}>
               {(item, index) => (
                 <div 
                   flex items-center justify-center
-                  h-16 w-16 rounded-lg
+                  h-13 w-13 rounded-lg
                   cursor-pointer transition-colors
-                  hover="bg-violet-200 dark:bg-violet-200"
-                  class={selectedTab() === item ? 'bg-violet-200 dark:bg-violet-200' : 'bg-neutral-100 dark:bg-neutral-600'}
-                  onClick={() => setSelectedTab(item)}
+                  // hover="bg-violet-200 dark:bg-violet-200"
+                  class={selectedTab() === item ? 'bg-gray-200' : ''}
+                  onClick={() => {
+                    console.log(item);
+                    
+                    setSelectedTab(item)
+                    setIsShadow(false)
+                  }}
                 >
                   <Show
                     when={selectedImage()[item]}
@@ -202,22 +255,43 @@ const App: Component = () => {
               )}
             </For>
           </header>
-          <main p-4>
-            <div flex="~ wrap" gap-2 justify-center>
+      </div>
+      <main
+        items-center justify-center gap-4
+        w-full px-6 mx-auto bg-op-80
+        class='relative'
+        box-border
+        dark:bg-dark
+        md:px-24
+        onTouchMove={()=>{if(document.documentElement.scrollTop===0){
+          isShadow()===true && setIsShadow(false)
+        }else{
+          isShadow()===false && setIsShadow(true)
+        }}}
+      >
+        <div w-full>
+          <main >
+            <div class='grid grid-cols-3'>
+              {selectedTab()!=='head'&&<div flex justify-center items-center 
+              onClick={[handleSelectItem, {tab: selectedTab(), index: 0 }]}>
+                <img src="../public/clear.png" alt="" style={{width:'18vw',height:'18vw'}} />
+              </div>}
               <Switch>
                 <For each={Object.keys(images())}>
                   {(tab: EmojiSlice) => (
                     <Match when={tab === selectedTab()}>
                       <For each={images()[tab]}>
                         {(item, index) => (
-                          <SelectButton
-                            highlight={() => index() === selectedIndex()[selectedTab()]}
-                            onClick={[handleSelectItem, {tab: selectedTab(), index: index() }]}
-                          >
-                            <Show when={item}>
-                              <img src={item} alt={selectedTab() + index()} h-10 w-10></img>
-                            </Show>
-                          </SelectButton>
+                          <>
+                            {item==='' ? <></> : <SelectButton
+                              highlight={() => index() === selectedIndex()[selectedTab()]}
+                              onClick={[handleSelectItem, {tab: selectedTab(), index: index() }]}
+                            >
+                              <Show when={item}>
+                                <img src={item} alt={selectedTab() + index()} style={{width:'21vw',height:'21vw'}}></img>
+                              </Show>
+                            </SelectButton>}
+                          </>
                         )}
                       </For>
                     </Match>
@@ -228,8 +302,23 @@ const App: Component = () => {
           </main>
         </div>
       </main>
-      <Footer />
-    </>
+      {isHome() && (
+        <div z-3 class='fixed left-0 top-0' style={{
+          width:'100vw',
+          height:'100vh',
+          background:'url(../public/bg_emoji.png) left top no-repeat',
+          "background-size":"100vw 100vh"
+        }}>
+          <div style={{width:'68vw',height:'87vw','margin-top':'26vw'}} m-auto>
+            <img w-full h-full  src="../public/banner.png" alt=""  />
+          </div>
+          <div style={{width:'70vw'}} h-5 bg-white m-auto mt-15 rounded-full overflow-hidden>
+            <div class='myLoading'></div>
+          </div>
+          <h5 text-white text-lg text-center mt-2>Loading...</h5>
+      </div>
+      )}
+    </div>
   )
 }
 
