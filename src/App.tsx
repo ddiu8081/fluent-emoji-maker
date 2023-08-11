@@ -168,47 +168,47 @@ const App: Component = () => {
           <canvas ref={canvas} width={canvasSize} height={canvasSize} w="160px" h="160px" class="animation"></canvas>
         </div>
         <div flex h-12 gap-2>
-          <div
+          <button
             flex items-center justify-center w-12 rounded-full
             bg-neutral-100 dark:bg-neutral-600
-            text-black dark:text-white
+            text-black dark:text-white border-none
             cursor-pointer transition-colors
             hover="bg-violet-200 dark:bg-violet-400"
             onClick={getRandom}
           >
             <div i-material-symbols-refresh text-2xl />
-          </div>
-          <div
+          </button>
+          <button
             inline-flex px-3 items-center gap-1 rounded-full
             bg-neutral-100 dark:bg-neutral-600
-            text-black dark:text-white
+            text-black dark:text-white border-none
             cursor-pointer transition-colors
             hover="bg-violet-200 dark:bg-violet-400"
             onClick={() => canvas.toBlob(exportImage)}
           >
             <div i-material-symbols-download-rounded text-2xl />
             <span font-bold mr-1>Export PNG</span>
-          </div>
-          <div
+          </button>
+          <button
             inline-flex px-3 items-center gap-1 rounded-full
             bg-neutral-100 dark:bg-neutral-600
-            text-black dark:text-white
+            text-black dark:text-white border-none
             cursor-pointer transition-colors
             hover="bg-violet-200 dark:bg-violet-400"
             onClick={() => toSVGBlob().then(exportImage)}
           >
             <div i-material-symbols-download-rounded text-2xl />
             <span font-bold mr-1>Export SVG</span>
-          </div>
+          </button>
         </div>
         <div w-full mt-4>
           <header flex flex-wrap items-center gap-3 p-4 border-b border-neutral-400 border-op-20 justify-center>
             <For each={tabs}>
               {(item, index) => (
-                <div 
+                <button
                   flex items-center justify-center
                   h-16 w-16 rounded-lg
-                  cursor-pointer transition-colors
+                  cursor-pointer transition-colors border-none
                   hover="bg-violet-200 dark:bg-violet-200"
                   class={selectedTab() === item ? 'bg-violet-200 dark:bg-violet-200' : 'bg-neutral-100 dark:bg-neutral-600'}
                   onClick={() => setSelectedTab(item)}
@@ -218,7 +218,7 @@ const App: Component = () => {
                   >
                     <img src={selectedImage()[item]} alt={selectedTab() + index()} h-12 w-12></img>
                   </Show>
-                </div>
+                </button>
               )}
             </For>
           </header>
