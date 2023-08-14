@@ -2,9 +2,9 @@ export default (props) => {
   const slot = props.children;
   const isHighlight = props.highlight;
   return (
-    <div
+    <button
       flex items-center justify-center h-14 w-14
-      rounded-md
+      rounded-md border-none
       border border-2 cursor-pointer
       transition-colors
       hover="bg-violet-200 dark:bg-violet-200 border-violet-400"
@@ -12,6 +12,6 @@ export default (props) => {
       onClick={props.onClick}
     >
       {slot}
-    </div>
+    </button>
   )
 }
